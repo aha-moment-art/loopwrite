@@ -2,179 +2,79 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>🎧 YouTube 听写工具</title>
+  <title>🎬 YouTube 循环播放器</title>
   <style>
-    :root {
-      --main-bg: #f4f0fa;
-      --panel-bg: #ffffff;
-      --primary: #a88adb;
-      --primary-dark: #8a6dc4;
-      --text: #333;
-      --input-bg: #f8f4ff;
-    }
-
     body {
       font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      background-color: var(--main-bg);
-      color: var(--text);
+      background: #f9f9fb;
+      color: #333;
       padding: 30px;
     }
-
     h1 {
-      color: var(--primary-dark);
       text-align: center;
-      margin-bottom: 30px;
+      color: #6c4db4;
     }
-
-    #top-bar {
-      background-color: var(--panel-bg);
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    #controls {
+      background: #fff;
       padding: 20px;
-      margin-bottom: 30px;
+      border-radius: 10px;
+      max-width: 900px;
+      margin: 20px auto;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
       display: flex;
-      flex-wrap: nowrap;
+      flex-wrap: wrap;
       gap: 12px;
-      align-items: center;
       justify-content: center;
-      overflow-x: auto;
     }
-
-    #youtube-url {
-      flex: 2 1 400px;
-      min-width: 320px;
-      max-width: 600px;
-    }
-
-    #top-bar input,
-    #top-bar select,
-    #top-bar button {
-      flex: 0 0 auto;
+    #controls input, #controls button {
       padding: 10px 14px;
       font-size: 16px;
       border: 1px solid #ccc;
-      border-radius: 8px;
-      background-color: var(--input-bg);
-      box-sizing: border-box;
-      height: 42px;
+      border-radius: 6px;
     }
-
-    #top-bar select,
-    #top-bar .time-input {
-      width: 120px;
-    }
-
-    #top-bar button {
-      background-color: var(--primary);
+    #controls button {
+      background: #a88adb;
       color: white;
       cursor: pointer;
-      transition: background-color 0.3s;
-      width: 100px;
     }
-
-    #top-bar button:hover {
-      background-color: var(--primary-dark);
+    #controls button:hover {
+      background: #8a6dc4;
     }
-
-    #container {
-      display: flex;
-      gap: 30px;
-      flex-wrap: wrap;
+    #player-container {
+      max-width: 900px;
+      margin: 0 auto;
+      border-radius: 10px;
+      overflow: hidden;
     }
-
-    #video-container,
-    #input-area {
-      flex: 1 1 400px;
-      background-color: var(--panel-bg);
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
-    }
-
     iframe {
       width: 100%;
-      height: 360px;
-      border-radius: 8px;
+      height: 480px;
       border: none;
-    }
-
-    #input {
-      width: 100%;
-      padding: 12px;
-      font-size: 18px;
-      margin-top: 15px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      background-color: var(--input-bg);
-    }
-
-    #output {
-      margin-top: 15px;
-      background: #fefeff;
-      padding: 15px;
-      border: 1px dashed var(--primary);
-      min-height: 250px;
-      white-space: pre-wrap;
-      font-size: 17px;
-      line-height: 1.6;
-      border-radius: 8px;
-      font-family: 'Courier New', monospace;
-    }
-
-    #clear-btn {
-      float: right;
-      margin-bottom: 5px;
-      background-color: transparent;
-      border: none;
-      color: var(--primary-dark);
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    #clear-btn:hover {
-      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <h1>🎧 YouTube 听写工具</h1>
+  <h1>🎬 YouTube 循环播放器</h1>
 
-  <div id="top-bar">
-    <input type="text" id="youtube-url" placeholder="粘贴 YouTube 链接" />
-    <select id="play-seconds">
-      <option value="3">播放 3 秒</option>
-      <option value="5" selected>播放 5 秒</option>
-      <option value="7">播放 7 秒</option>
-      <option value="10">播放 10 秒</option>
-    </select>
-    <button id="start-btn">开始</button>
-    <input class="time-input" id="start-time" type="number" min="0" placeholder="起始时间（秒）" />
-    <input class="time-input" id="end-time" type="number" min="0" placeholder="结束时间（秒）" />
-    <input class="time-input" id="repeat-count" type="number" min="1" value="1" placeholder="重复次数" />
-    <button id="focus-btn">专注播放</button>
+  <div id="controls">
+    <input type="text" id="youtube-url" placeholder="输入 YouTube 链接" size="40" />
+    <input type="number" id="play-count" min="1" value="1" placeholder="播放次数" />
+    <button id="load-btn">加载播放</button>
+    <input type="number" id="start-time" min="0" placeholder="片段开始时间（秒）" />
+    <input type="number" id="end-time" min="0" placeholder="片段结束时间（秒）" />
+    <input type="number" id="repeat-count" min="1" value="1" placeholder="重复次数" />
+    <button id="repeat-btn">重复播放片段</button>
   </div>
 
-  <div id="container">
-    <div id="video-container">
-      <div id="player"></div>
-    </div>
-    <div id="input-area">
-      <button id="clear-btn">🗑 清空文本</button>
-      <label for="input"><strong>听写输入：</strong> 按下 Enter 播放下一段</label>
-      <input id="input" type="text" placeholder="输入一句后按 Enter" autofocus />
-      <div id="output"></div>
-    </div>
+  <div id="player-container">
+    <div id="player"></div>
   </div>
 
   <script src="https://www.youtube.com/iframe_api"></script>
   <script>
     let player;
-    let timeoutId;
-    let playDuration = 5000;
-    let readyToPlay = false;
-    let focusStart = null;
-    let focusEnd = null;
+    let ready = false;
 
     function extractVideoID(url) {
       const regExp = /(?:youtube\.com\/(?:.*v=|.*\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
@@ -184,94 +84,66 @@
 
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('player', {
-        height: '360',
-        width: '640',
+        height: '480',
+        width: '800',
         videoId: '',
         events: {
-          'onReady': () => {
-            readyToPlay = true;
-          }
+          'onReady': () => ready = true
         }
       });
     }
 
-    document.getElementById("start-btn").addEventListener("click", () => {
-      if (!player || !readyToPlay) {
-        alert("播放器尚未就绪，请稍候再试！");
-        return;
-      }
+    document.getElementById("load-btn").addEventListener("click", () => {
       const url = document.getElementById("youtube-url").value.trim();
       const videoId = extractVideoID(url);
-      playDuration = parseInt(document.getElementById("play-seconds").value, 10) * 1000;
-      if (videoId) {
-        player.loadVideoById(videoId);
-        focusStart = null;
-        focusEnd = null;
-        setTimeout(() => {
-          playSegment();
-        }, 1000);
-      } else {
-        alert("请输入有效的 YouTube 链接！");
-      }
-    });
+      const times = parseInt(document.getElementById("play-count").value) || 1;
 
-    function playSegment() {
-      if (!readyToPlay) return;
-      clearTimeout(timeoutId);
-      if (focusStart !== null && focusEnd !== null) {
-        player.seekTo(focusStart);
-        player.playVideo();
-        timeoutId = setTimeout(() => {
-          player.pauseVideo();
-        }, (focusEnd - focusStart) * 1000);
-      } else {
-        player.playVideo();
-        timeoutId = setTimeout(() => {
-          player.pauseVideo();
-        }, playDuration);
-      }
-    }
-
-    document.getElementById("focus-btn").addEventListener("click", () => {
-      focusStart = parseInt(document.getElementById("start-time").value) || 0;
-      focusEnd = parseInt(document.getElementById("end-time").value) || 0;
-      const repeat = parseInt(document.getElementById("repeat-count").value) || 1;
-
-      if (focusEnd <= focusStart) {
-        alert("结束时间必须大于起始时间");
+      if (!videoId || !ready) {
+        alert("请检查链接是否有效，或稍等播放器加载完成。");
         return;
       }
 
       let count = 0;
 
-      function repeatPlay() {
-        if (count >= repeat) return;
-        player.seekTo(focusStart);
+      function playNext() {
+        if (count >= times) return;
+        player.seekTo(0);
         player.playVideo();
-        timeoutId = setTimeout(() => {
+        count++;
+        setTimeout(() => {
           player.pauseVideo();
-          count++;
-          setTimeout(repeatPlay, 500);
-        }, (focusEnd - focusStart) * 1000);
+          playNext();
+        }, 8000); // 默认播放 8 秒，你可以自定义或设置成可选
       }
 
-      repeatPlay();
+      player.loadVideoById(videoId);
+      setTimeout(playNext, 1500);
     });
 
-    document.getElementById("input").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        const line = e.target.value.trim();
-        if (line) {
-          document.getElementById("output").textContent += line + "\n";
-        }
-        e.target.value = "";
-        e.preventDefault();
-        playSegment();
+    document.getElementById("repeat-btn").addEventListener("click", () => {
+      const start = parseFloat(document.getElementById("start-time").value);
+      const end = parseFloat(document.getElementById("end-time").value);
+      const repeat = parseInt(document.getElementById("repeat-count").value) || 1;
+
+      if (isNaN(start) || isNaN(end) || end <= start) {
+        alert("请正确填写片段的起始和结束时间");
+        return;
       }
-    });
 
-    document.getElementById("clear-btn").addEventListener("click", () => {
-      document.getElementById("output").textContent = "";
+      let count = 0;
+
+      function repeatSegment() {
+        if (count >= repeat) return;
+        player.seekTo(start);
+        player.playVideo();
+        count++;
+        setTimeout(() => {
+          player.pauseVideo();
+          setTimeout(repeatSegment, 500);
+        }, (end - start) * 1000);
+      }
+
+      repeatSegment();
     });
   </script>
 </body>
