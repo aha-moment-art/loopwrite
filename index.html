@@ -17,7 +17,7 @@
       color: #6c4db4;
     }
 
-    #controls {
+    .controls-section {
       background: #fff;
       padding: 20px;
       border-radius: 10px;
@@ -30,28 +30,30 @@
       justify-content: center;
     }
 
-    #controls input, #controls button {
+    .controls-section input,
+    .controls-section button {
       padding: 10px 14px;
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 6px;
     }
 
-    #controls button {
+    .controls-section button {
       background: #a88adb;
       color: white;
       cursor: pointer;
     }
 
-    #controls button:hover {
+    .controls-section button:hover {
       background: #8a6dc4;
     }
 
     #player-container {
       max-width: 900px;
-      margin: 0 auto;
+      margin: 30px auto 0;
       border-radius: 10px;
       overflow: hidden;
+      display: none; /* 初始隐藏 */
     }
 
     #player {
@@ -63,16 +65,22 @@
 <body>
   <h1>🎬 YouTube 循环播放器</h1>
 
-  <div id="controls">
+  <!-- 第一行功能：加载播放整个视频 -->
+  <div class="controls-section">
     <input type="text" id="youtube-url" placeholder="输入 YouTube 链接" size="40" />
     <input type="number" id="play-count" min="1" value="1" placeholder="播放次数" />
     <button id="load-btn">加载并播放</button>
+  </div>
+
+  <!-- 第二行功能：播放片段 -->
+  <div class="controls-section">
     <input type="number" id="start-time" min="0" placeholder="片段开始（秒）" />
     <input type="number" id="end-time" min="0" placeholder="片段结束（秒）" />
     <input type="number" id="repeat-count" min="1" value="1" placeholder="重复次数" />
     <button id="repeat-btn">播放片段</button>
   </div>
 
+  <!-- 视频播放器容器 -->
   <div id="player-container">
     <div id="player"></div>
   </div>
@@ -90,8 +98,10 @@
 
     function createPlayer(videoId, onReadyCallback) {
       if (player && typeof player.destroy === "function") {
-        player.destroy(); // 清除旧播放器
+        player.destroy(); // 销毁旧播放器
       }
+
+      document.getElementById('player-container').style.display = 'block';
 
       player = new YT.Player('player', {
         height: '480',
