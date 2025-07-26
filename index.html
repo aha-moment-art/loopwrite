@@ -88,27 +88,29 @@
       return match ? match[1] : null;
     }
 
-    function onYouTubeIframeAPIReady() {
+    function createPlayer(videoId, onReadyCallback) {
+      if (player && typeof player.destroy === "function") {
+        player.destroy(); // 清除旧播放器
+      }
+
       player = new YT.Player('player', {
         height: '480',
         width: '800',
-        videoId: '',
+        videoId: videoId,
         playerVars: {
           modestbranding: 1,
           rel: 0,
         },
         events: {
-          'onReady': () => { ready = true; }
+          'onReady': () => {
+            ready = true;
+            if (onReadyCallback) onReadyCallback();
+          }
         }
       });
     }
 
     document.getElementById("load-btn").addEventListener("click", () => {
-      if (!ready) {
-        alert("播放器未准备好，请稍候再试。");
-        return;
-      }
-
       const url = document.getElementById("youtube-url").value.trim();
       const videoId = extractVideoID(url);
       const times = parseInt(document.getElementById("play-count").value) || 1;
@@ -118,34 +120,33 @@
         return;
       }
 
-      let count = 0;
+      createPlayer(videoId, () => {
+        let count = 0;
 
-      player.loadVideoById(videoId);
-      player.playVideo();
+        function repeatPlay() {
+          if (count >= times) return;
+          player.seekTo(0);
+          player.playVideo();
+          count++;
+          setTimeout(() => {
+            player.pauseVideo();
+            setTimeout(repeatPlay, 800);
+          }, 8000); // 默认播放 8 秒
+        }
 
-      function repeatPlay() {
-        if (count >= times) return;
-        player.seekTo(0);
-        player.playVideo();
-        count++;
-        setTimeout(() => {
-          player.pauseVideo();
-          setTimeout(repeatPlay, 800);
-        }, 8000); // 默认播放 8 秒
-      }
-
-      setTimeout(repeatPlay, 1000);
+        repeatPlay();
+      });
     });
 
     document.getElementById("repeat-btn").addEventListener("click", () => {
-      if (!ready) {
-        alert("播放器未准备好。");
-        return;
-      }
-
       const start = parseFloat(document.getElementById("start-time").value);
       const end = parseFloat(document.getElementById("end-time").value);
       const repeat = parseInt(document.getElementById("repeat-count").value) || 1;
+
+      if (!player || !ready) {
+        alert("请先加载视频。");
+        return;
+      }
 
       if (isNaN(start) || isNaN(end) || end <= start) {
         alert("请正确设置起始和结束时间。");
