@@ -11,10 +11,12 @@
       color: #333;
       padding: 30px;
     }
+
     h1 {
       text-align: center;
       color: #6c4db4;
     }
+
     #controls {
       background: #fff;
       padding: 20px;
@@ -27,30 +29,34 @@
       gap: 12px;
       justify-content: center;
     }
+
     #controls input, #controls button {
       padding: 10px 14px;
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 6px;
     }
+
     #controls button {
       background: #a88adb;
       color: white;
       cursor: pointer;
     }
+
     #controls button:hover {
       background: #8a6dc4;
     }
+
     #player-container {
       max-width: 900px;
       margin: 0 auto;
       border-radius: 10px;
       overflow: hidden;
     }
-    iframe {
+
+    #player {
       width: 100%;
       height: 480px;
-      border: none;
     }
   </style>
 </head>
@@ -60,11 +66,11 @@
   <div id="controls">
     <input type="text" id="youtube-url" placeholder="输入 YouTube 链接" size="40" />
     <input type="number" id="play-count" min="1" value="1" placeholder="播放次数" />
-    <button id="load-btn">加载播放</button>
-    <input type="number" id="start-time" min="0" placeholder="片段开始时间（秒）" />
-    <input type="number" id="end-time" min="0" placeholder="片段结束时间（秒）" />
+    <button id="load-btn">加载并播放</button>
+    <input type="number" id="start-time" min="0" placeholder="片段开始（秒）" />
+    <input type="number" id="end-time" min="0" placeholder="片段结束（秒）" />
     <input type="number" id="repeat-count" min="1" value="1" placeholder="重复次数" />
-    <button id="repeat-btn">重复播放片段</button>
+    <button id="repeat-btn">播放片段</button>
   </div>
 
   <div id="player-container">
@@ -87,46 +93,62 @@
         height: '480',
         width: '800',
         videoId: '',
+        playerVars: {
+          modestbranding: 1,
+          rel: 0,
+        },
         events: {
-          'onReady': () => ready = true
+          'onReady': () => { ready = true; }
         }
       });
     }
 
     document.getElementById("load-btn").addEventListener("click", () => {
+      if (!ready) {
+        alert("播放器未准备好，请稍候再试。");
+        return;
+      }
+
       const url = document.getElementById("youtube-url").value.trim();
       const videoId = extractVideoID(url);
       const times = parseInt(document.getElementById("play-count").value) || 1;
 
-      if (!videoId || !ready) {
-        alert("请检查链接是否有效，或稍等播放器加载完成。");
+      if (!videoId) {
+        alert("请输入有效的 YouTube 链接！");
         return;
       }
 
       let count = 0;
 
-      function playNext() {
+      player.loadVideoById(videoId);
+      player.playVideo();
+
+      function repeatPlay() {
         if (count >= times) return;
         player.seekTo(0);
         player.playVideo();
         count++;
         setTimeout(() => {
           player.pauseVideo();
-          playNext();
-        }, 8000); // 默认播放 8 秒，你可以自定义或设置成可选
+          setTimeout(repeatPlay, 800);
+        }, 8000); // 默认播放 8 秒
       }
 
-      player.loadVideoById(videoId);
-      setTimeout(playNext, 1500);
+      setTimeout(repeatPlay, 1000);
     });
 
     document.getElementById("repeat-btn").addEventListener("click", () => {
+      if (!ready) {
+        alert("播放器未准备好。");
+        return;
+      }
+
       const start = parseFloat(document.getElementById("start-time").value);
       const end = parseFloat(document.getElementById("end-time").value);
       const repeat = parseInt(document.getElementById("repeat-count").value) || 1;
 
       if (isNaN(start) || isNaN(end) || end <= start) {
-        alert("请正确填写片段的起始和结束时间");
+        alert("请正确设置起始和结束时间。");
         return;
       }
 
@@ -139,7 +161,7 @@
         count++;
         setTimeout(() => {
           player.pauseVideo();
-          setTimeout(repeatSegment, 500);
+          setTimeout(repeatSegment, 600);
         }, (end - start) * 1000);
       }
 
