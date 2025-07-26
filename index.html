@@ -190,6 +190,19 @@
       }
       repeatSegment();
     });
+
+    // ✅ 空格键控制播放/暂停
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Space" && player && ready) {
+        e.preventDefault(); // 阻止页面滚动
+        const state = player.getPlayerState();
+        if (state === YT.PlayerState.PLAYING) {
+          player.pauseVideo();
+        } else if (state === YT.PlayerState.PAUSED || state === YT.PlayerState.ENDED) {
+          player.playVideo();
+        }
+      }
+    });
   </script>
 </body>
 </html>
